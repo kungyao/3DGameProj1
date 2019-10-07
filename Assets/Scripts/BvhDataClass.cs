@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿//資料結構
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Pair<T1, T2>
@@ -81,4 +82,79 @@ public class BvhData
 {
     public Joint joint;
     public Motion motion;
+    //存關節的GameObject
+    public List<Transform> jointObject = new List<Transform>();
+
+    //現在的動作(楨數)
+    private int nowFrame = 0;
+
+    //目前是什麼動作
+    private int motionType = 0;
+
+    //load 下一個動作(楨)
+    public void JumpNextFrame()
+    {
+        //Root關節
+        assignData(jointObject[0], this.joint, 0);
+        nowFrame++;
+        nowFrame %= this.motion.frames;
+    }
+
+    //內插至下一楨
+    public void InterpolationNextFrame()
+    {
+
+    }
+
+    //根據關節recursive位移Gameobject 回傳MotionIndex
+    private int assignData(Transform _object, Joint _joint, int _motionIndex)
+    {
+
+        Vector3 tmpVec = new Vector3();
+        Vector3 tmpqua = new Vector3();
+        for (int i = 0; i < _joint.channels.Count; i++)
+        {
+            if (_joint.channels[i] == "Xposition")
+            {
+                tmpVec.x = this.motion.aniData[this.nowFrame][_motionIndex++];
+            }
+            else if (_joint.channels[i] == "Yposition")
+            {
+                tmpVec.y = this.motion.aniData[this.nowFrame][_motionIndex++];
+            }
+            else if (_joint.channels[i] == "Zposition")
+            {
+                tmpVec.z = this.motion.aniData[this.nowFrame][_motionIndex++];
+            }
+            else if (_joint.channels[i] == "Xrotation")
+            {
+                tmpqua.x = this.motion.aniData[this.nowFrame][_motionIndex++];
+            }
+            else if (_joint.channels[i] == "Yrotation")
+            {
+                tmpqua.y = this.motion.aniData[this.nowFrame][_motionIndex++];
+            }
+            else if (_joint.channels[i] == "Zrotation")
+            {
+                tmpqua.z = this.motion.aniData[this.nowFrame][_motionIndex++];
+            }
+        }
+        if (_joint.type == JType.ROOT)
+            _object.localPosition = _joint.offset + tmpVec;
+        else
+            _object.localPosition = _joint.offset;
+        _object.localRotation = Quaternion.Euler(tmpqua);
+
+        //recursive 剩下的關節
+        foreach (Joint jt in _joint.jointChilds)
+        {
+            int nextObjIndex = ((_motionIndex - 6) / 3) + 1;
+            //end 直接return
+            if (jt.type == JType.ENDSITE)
+                continue;
+            _motionIndex = assignData(this.jointObject[nextObjIndex], jt, _motionIndex);
+        }
+        return _motionIndex;
+    }
+
 }

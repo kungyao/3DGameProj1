@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿//Ini
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using BvhDatas = System.Collections.Generic.List<BvhData>;
@@ -11,7 +12,12 @@ public class BvhReader : MonoBehaviour
     void Start()
     {
         print(Application.dataPath + "/Resources/actorNoMotion.bvh");
-        LoadFile(Application.dataPath + "/Resources/actorNoMotion.bvh");
+        LoadFile(Application.dataPath + "/Resources/walk_01.bvh");
+    }
+
+    private void Update()
+    {
+        datas[0].JumpNextFrame();
     }
 
     private void OnDrawGizmos()
@@ -28,11 +34,14 @@ public class BvhReader : MonoBehaviour
     private GameObject CreateCubeObjSub(Joint jtParent, Vector3 offset, GameObject parent)
     {
         GameObject jtp = new GameObject(jtParent.name);
+        datas[datas.Count - 1].jointObject.Add(jtp.transform);
         jtp.transform.position = jtParent.offset + offset;
         jtp.transform.parent = parent.transform;
         foreach (Joint jt in jtParent.jointChilds)
         {
-            GameObject tmpChild = CreateCubeObjSub(jt, jtp.transform.position, parent);
+            if (jt.type == JType.ENDSITE)
+                continue;
+            GameObject tmpChild = CreateCubeObjSub(jt, jtp.transform.position, jtp);
             Pair<Transform, Transform> tmp = new Pair<Transform, Transform>();
             tmp.First = jtp.transform;
             tmp.Second = tmpChild.transform;
