@@ -85,6 +85,10 @@ public class BvhData
     //存關節的GameObject
     public List<Transform> jointObject = new List<Transform>();
 
+    public int interpolation = 1;
+
+    public string fileName = "";
+
     //現在的動作(楨數)
     private int nowFrame = 0;
 
@@ -102,6 +106,12 @@ public class BvhData
 
     //內插至下一楨
     public void InterpolationNextFrame()
+    {
+
+    }
+
+    //畫骨架
+    public void draw()
     {
 
     }

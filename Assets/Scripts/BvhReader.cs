@@ -12,7 +12,7 @@ public class BvhReader : MonoBehaviour
     void Start()
     {
         print(Application.dataPath + "/Resources/actorNoMotion.bvh");
-        LoadFile(Application.dataPath + "/Resources/walk_01.bvh");
+        LoadFile(Application.dataPath + "/Resources/actorNoMotion.bvh");
     }
 
     private void Update()

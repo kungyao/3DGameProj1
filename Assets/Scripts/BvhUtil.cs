@@ -230,7 +230,8 @@ public class BvhUtility
         }
     }
 
-    static public void ParseBvhData(ref BvhDatas roots, string path)
+    //return 1:error  0:correct
+    static public int ParseBvhData(ref BvhDatas roots, string path)
     {
         BvhSteps c = new BvhSteps();
         StreamReader fileContent = new StreamReader(path);
@@ -254,6 +255,7 @@ public class BvhUtility
                     roots[rTop].joint = new Joint();
                     roots[rTop].joint.name = items[1];
                     roots[rTop].joint.type = JType.ROOT;
+                    roots[rTop].fileName = Path.GetFileName(path);
                     continue;
                 }
                 else if (now == BVH.OFFSET)
@@ -303,9 +305,10 @@ public class BvhUtility
             else
             {
                 Debug.Log("Error");
-                return;
+                return 1;
             }
         }
+        return 0;
 
         // print joint data
         //foreach (BvhData bd in roots)
