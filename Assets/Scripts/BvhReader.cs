@@ -17,10 +17,10 @@ public class BvhReader : MonoBehaviour
 
     private void Update()
     {
-        datas[0].JumpNextFrame();
+        //datas[0].JumpNextFrame();
     }
 
-    private void OnDrawGizmos()
+    /*private void OnDrawGizmos()
     {
         if (datas.Count > 0)
         {
@@ -29,7 +29,7 @@ public class BvhReader : MonoBehaviour
                 Gizmos.DrawLine(kp.First.position, kp.Second.position);
             }
         }
-    }
+    }*/
 
     private GameObject CreateCubeObjSub(Joint jtParent, Vector3 offset, GameObject parent)
     {

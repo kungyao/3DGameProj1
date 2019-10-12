@@ -289,17 +289,17 @@ public class BvhUtility
                 }
                 else if (now == BVH.MOTION)
                 {
-                    roots[rTop].motion = new Motion();
+                    roots[rTop].motion.Add(new Motion());
                 }
                 else if (now == BVH.FRAMES)
                 {
-                    roots[rTop].motion.frames = int.Parse(items[1]);
-                    roots[rTop].motion.aniData = new List<List<float>>(roots[rTop].motion.frames);
+                    roots[rTop].motion[0].frames = int.Parse(items[1]);
+                    roots[rTop].motion[0].aniData = new List<List<float>>(roots[rTop].motion[0].frames);
                 }
                 else if (now == BVH.FRAME_TIME)
                 {
-                    roots[rTop].motion.frame_time = float.Parse(items[2]);
-                    readAniData(fileContent, roots[rTop].motion);
+                    roots[rTop].motion[0].frame_time = float.Parse(items[2]);
+                    readAniData(fileContent, roots[rTop].motion[0]);
                 }
             }
             else
