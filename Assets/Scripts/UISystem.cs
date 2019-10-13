@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Windows.Forms;
 
 public class UISystem : MonoBehaviour
 {
@@ -9,29 +10,61 @@ public class UISystem : MonoBehaviour
     public Text Log;
     public Text PlayStop;
     public Text twoMotion;
+    public Text DisText;
+
+    public GameObject addptBtn;
+    public GameObject rmptBtn;
 
     //讀多個檔案
     //加入人物(Create obj)
+    //public void LoadFileCN()
+    //{
+    //    print(FileName.text);
+    //    bool error = GameManager.One.LoadFile(Application.dataPath + "/Resources/" + FileName.text + ".bvh");
+    //    if (error)
+    //        Log.text = "error";
+    //}
     public void LoadFileCN()
     {
-        print(FileName.text);
-        bool error = GameManager.One.LoadFile(Application.dataPath + "/Resources/" + FileName.text + ".bvh");
-        if (error)
-            Log.text = "error";
+        OpenFileDialog dialog = new OpenFileDialog();
+        if (dialog.ShowDialog() == DialogResult.OK)
+        {
+            print(FileName.text);
+            bool error = GameManager.One.LoadFile(dialog.FileName);
+            if (error)
+                Log.text = "error";
+        }
     }
 
+    //public void LoadFileAM()
+    //{
+    //    List<BvhData> tmp = new List<BvhData>();
+    //    int error = BvhUtility.ParseBvhData(ref tmp, Application.dataPath + "/Resources/" + FileName.text + ".bvh");
+    //    if (error == 1)
+    //        Log.text = "error";
+    //    else if (BvhData.equal(GameManager.One.datas[GameManager.One.dataIndex].joint, tmp[0].joint))
+    //    {
+    //        GameManager.One.datas[GameManager.One.dataIndex].addMotion(tmp[0]);
+    //    }
+    //    else
+    //        Log.text = "error";
+    //}
     public void LoadFileAM()
     {
-        List<BvhData> tmp = new List<BvhData>();
-        int error = BvhUtility.ParseBvhData(ref tmp, Application.dataPath + "/Resources/" + FileName.text + ".bvh");
-        if (error == 1)
-            Log.text = "error";
-        else if (BvhData.equal(GameManager.One.datas[GameManager.One.dataIndex].joint, tmp[0].joint))
+        OpenFileDialog dialog = new OpenFileDialog();
+        if (dialog.ShowDialog() == DialogResult.OK)
         {
-            GameManager.One.datas[GameManager.One.dataIndex].addMotion(tmp[0]);
+            List<BvhData> tmp = new List<BvhData>();
+            int error = BvhUtility.ParseBvhData(ref tmp, dialog.FileName);
+            if (error == 1)
+                Log.text = "error";
+            else if (BvhData.equal(GameManager.One.datas[GameManager.One.dataIndex].joint, tmp[0].joint))
+            {
+                GameManager.One.datas[GameManager.One.dataIndex].addMotion(tmp[0]);
+            }
+            else
+                Log.text = "error";
         }
-        else
-            Log.text = "error";
     }
 
     //切換骨架的button
@@ -55,11 +88,17 @@ public class UISystem : MonoBehaviour
                 for (int j = 0; j < GameManager.One.datas.Count; j++)
                 {
                     if (j == GameManager.One.dataIndex)
-                        GameManager.One.objects[j].active = true;
+                        GameManager.One.SetObjectActive(j, true);
                     else
-                        GameManager.One.objects[j].active = false;
+                        GameManager.One.SetObjectActive(j, false);
                 }
             }
+        }
+
+        if (GameManager.One.dataIndex != -1)
+        {
+            addptBtn.SetActive(true);
+            rmptBtn.SetActive(true);
         }
     }
 
@@ -103,5 +142,10 @@ public class UISystem : MonoBehaviour
             GameManager.One.datas[GameManager.One.dataIndex].motionPair.Second = index2;
             GameManager.One.datas[GameManager.One.dataIndex].motionType = index1;
         }
+    }
+
+    public void SetDis()
+    {
+        GameManager.One.SetDis(DisText.text);
     }
 }

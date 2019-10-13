@@ -4,56 +4,48 @@ using UnityEngine;
 
 public static class CurveUtil
 {
-    public static Vector3 LineSample(Vector3 p0, Vector3 p1, float t)
+    public static List<float> arcLength(List<Transform> cps, int detail, float weight)
     {
-        return (1 - t) * p0 + t * p1;
-    }
-    public static Vector3 QBezSample(Vector3 p0, Vector3 p1, Vector3 p2, float t)
-    {
-        return (1 - t) * (1 - t) * p0 + 
-            t * (1 - t) * p1 + 
-            t * t * p2;
-    }
-    public static Vector3 CBezSample(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-    {
-        return (1 - t) * (1 - t) * (1 - t) * p0 +
-            t * (1 - t) * (1 - t) * p1 +
-            t * t * (1 - t) * p2 +
-            t * t * t * p3;
-    }
-
-    public static Vector3 LineTangent(Vector3 p0, Vector3 p1)
-    {
-        return (p1 - p0).normalized;
-    }
-    public static Vector3 QBezTangent(Vector3 p0, Vector3 p1, Vector3 p2, float t)
-    {
-        Vector3 dp0 = 2 * (p1 - p0);
-        Vector3 dp1 = 2 * (p2 - p1);
-        return LineSample(dp0, dp1, t).normalized;
-    }
-    public static Vector3 CBezTangent(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-    {
-        Vector3 dp0 = 3 * (p1 - p0);
-        Vector3 dp1 = 3 * (p2 - p1);
-        Vector3 dp2 = 3 * (p3 - p2);
-        return QBezSample(dp0, dp1, dp2, t).normalized;
+        List<float> arcList = new List<float>(0);
+        for (int i = 0; i < cps.Count - 3; i++)
+        {
+            bool first = true;
+            Vector3 pre = Vector3.zero;
+            float tmpdis = 0;
+            for(int j = 0; j < detail; j++)
+            {
+                float t = (float)j / detail;
+                if (first)
+                {
+                    pre = Sample(cps[i].position, cps[i + 1].position, cps[i + 2].position, cps[i + 3].position, weight, t);
+                    first = false;
+                }
+                else
+                {
+                    Vector3 now = Sample(cps[i].position, cps[i + 1].position, cps[i + 2].position, cps[i + 3].position, weight, t);
+                    tmpdis += (now - pre).magnitude;
+                    pre = now;
+                }
+            }
+            arcList.Add(tmpdis);
+        }
+        return arcList;
     }
 
-    public static Vector3 Sample(Segment pre, Segment next, float t)
+    public static Vector3 Sample(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float weight, float t)
     {
-        if (pre.ifUseFull1 && pre.ifUseFull0) return CBezSample(pre.Point, pre.Handle1, next.Handle0, next.Point, t);
-        else if (!pre.ifUseFull1 && !pre.ifUseFull0) return LineSample(pre.Point, next.Point, t);
-        else if (pre.ifUseFull1 && !pre.ifUseFull0) return QBezSample(pre.Point, pre.Handle1, next.Point, t);
-        else if (!pre.ifUseFull1 && pre.ifUseFull0) return QBezSample(pre.Point, next.Handle0, next.Point, t);
-        return Vector3.zero;
+        Vector3 t3 = (p0 * -weight) + (p1 * (2 - weight)) + (p2 * (-2 + weight)) + (p3 * weight);
+        Vector3 t2 = (p0 * (2 * weight)) + (p1 * (-3 + weight)) + (p2 * (3 - 2 * weight)) + (p3 * -weight);
+        Vector3 t1 = (p0 * -weight) + (p2 * weight);
+        Vector3 t0 = p1;
+        return t * t * t * t3 + t * t * t2 + t * t1 + t0;
     }
-    public static Vector3 Tangent(Segment pre, Segment next, float t)
+    public static Vector3 Tangent(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float weight, float t)
     {
-        if (pre.ifUseFull1 && pre.ifUseFull0) return CBezTangent(pre.Point, pre.Handle1, next.Handle0, next.Point, t);
-        else if (!pre.ifUseFull1 && !pre.ifUseFull0) return LineTangent(pre.Point, next.Point);
-        else if (pre.ifUseFull1 && !pre.ifUseFull0) return QBezTangent(pre.Point, pre.Handle1, next.Point, t);
-        else if (!pre.ifUseFull1 && pre.ifUseFull0) return QBezTangent(pre.Point, next.Handle0, next.Point, t);
-        return Vector3.zero;
+        Vector3 t3 = (p0 * -weight) + (p1 * (2 - weight)) + (p2 * (-2 + weight)) + (p3 * weight);
+        Vector3 t2 = (p0 * (2 * weight)) + (p1 * (-3 + weight)) + (p2 * (3 - 2 * weight)) + (p3 * -weight);
+        Vector3 t1 = (p0 * -weight) + (p2 * weight);
+        Vector3 n = 3 * t * t * t3 + 2 * t * t2 + t1;
+        return n.normalized;
     }
 }

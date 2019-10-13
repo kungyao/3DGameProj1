@@ -15,11 +15,17 @@ using BvhDatas = System.Collections.Generic.List<BvhData>;
 public class GameManager : MonoBehaviour
 {
     public static GameManager One;
+    public GameObject cam;
     public BvhDatas datas = new BvhDatas();
     //管理場讓所有人物的
     public List<GameObject> objects = new List<GameObject>();
+    public List<Curve> objectCurves = new List<Curve>();
+    public LineRenderer lineRen;
+
+    public GameObject camPrefab;
+    public GameObject cPointPrefab;
     //目前哪個人物正在運作
-    public int dataIndex = 0;
+    public int dataIndex = -1;
     //false = stop  true = paly
     public bool stop_And_Play = false;
     //是否使用內插
@@ -37,6 +43,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         LoadFile(Application.dataPath + "/Resources/dance.bvh");
+        datas[dataIndex].draw();
     }
 
     // Update is called once per frame
@@ -63,9 +70,19 @@ public class GameManager : MonoBehaviour
                     datas[dataIndex].JumpNextFrame();
                 }
             }
+            //draw
+            datas[dataIndex].draw();
+            objectCurves[dataIndex].CalcT();
+            Vector3 nPos = objectCurves[dataIndex].getSampleByDis();
+            Vector3 nDir = objectCurves[dataIndex].getTangentByDis();
+            objects[dataIndex].transform.position = nPos;
+            objects[dataIndex].transform.forward = nDir;
+            
         }
-        //draw
-        datas[dataIndex].draw();
+        if (cam.activeSelf)
+        {
+            objectCurves[dataIndex].DrawLine();
+        }
     }
 
     private GameObject CreateCubeObjSub(Joint jtParent, Vector3 offset, GameObject parent)
@@ -90,15 +107,37 @@ public class GameManager : MonoBehaviour
         return jtp;
     }
 
+    public void ChangeCam()
+    {
+        cam.SetActive(!cam.activeSelf);
+    }
+
     public void CreateCubeObj()
     {
         if (objects.Count != 0)
             objects[dataIndex].active = false;
         GameObject tmp = new GameObject("tmp" + datas.Count);
+        GameObject tmpCam = GameObject.Instantiate(camPrefab);
+        tmpCam.transform.parent = tmp.transform;
+        CamController tmpCtl = tmpCam.GetComponent<CamController>();
+        tmpCtl.Target = tmp;
+        Curve tmpCurve = tmp.AddComponent<Curve>();
+        tmpCurve.Initialize(cPointPrefab);
+        objectCurves.Add(tmpCurve);
         objects.Add(tmp);
         dataIndex = datas.Count - 1;
         tmp.transform.position = Vector3.zero;
         CreateCubeObjSub(datas[datas.Count - 1].joint, tmp.transform.position, tmp);
+    }
+
+    public void SetDis(string disStr)
+    {
+        float dis = -1;
+        float.TryParse(disStr, out dis);
+        if (dis > 0)
+        {
+            objectCurves[dataIndex].arcDis = dis;
+        }
     }
 
     //error return 1
@@ -112,5 +151,36 @@ public class GameManager : MonoBehaviour
         }
         CreateCubeObj();
         return false;
+    }
+
+    public void SetObjectActive(int index, bool flag)
+    {
+        objects[index].SetActive(flag);
+        if (flag) objectCurves[index].EnableCps();
+        else objectCurves[index].DisAbleCps();
+    }
+
+    public GameObject getNowObject()
+    {
+        if (dataIndex != -1)
+        {
+            return objects[dataIndex];
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public BvhData getNowData()
+    {
+        if (dataIndex != -1)
+        {
+            return datas[dataIndex];
+        }
+        else
+        {
+            return null;
+        }
     }
 }

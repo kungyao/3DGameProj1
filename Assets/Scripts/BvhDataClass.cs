@@ -132,7 +132,7 @@ public class BvhData
     public Pair<int, int> framePair = new Pair<int, int>();
 
     //parse 到motion的地幾個
-    private int motionIndex = 0;
+    public int motionIndex = 0;
 
     //load 下一個動作(楨)
     public void JumpNextFrame()
