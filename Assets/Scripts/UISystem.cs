@@ -8,6 +8,7 @@ public class UISystem : MonoBehaviour
     public Text FileName;
     public Text Log;
     public Text PlayStop;
+    public Text twoMotion;
 
     //讀多個檔案
     //加入人物(Create obj)
@@ -60,7 +61,6 @@ public class UISystem : MonoBehaviour
                 }
             }
         }
-
     }
 
     //控制播放
@@ -77,6 +77,31 @@ public class UISystem : MonoBehaviour
     public void Interpolation()
     {
         GameManager.One.isInterpolation = !GameManager.One.isInterpolation;
+        GameManager.One.datas[GameManager.One.dataIndex].interpolation = 0;
     }
 
+    //切換跟線
+    public void InFollowLine()
+    {
+        GameManager.One.isFollowLine = !GameManager.One.isFollowLine;
+    }
+
+    public void IsBlend()
+    {
+        GameManager.One.isBlend = !GameManager.One.isBlend;
+        if(GameManager.One.isBlend)
+        {
+            string[] splitArray = twoMotion.text.Split(char.Parse(" "));
+            int index1 = int.Parse(splitArray[0]);
+            int index2 = int.Parse(splitArray[1]);
+            int frame1 = int.Parse(splitArray[2]);
+            int frame2 = int.Parse(splitArray[3]);
+            GameManager.One.datas[GameManager.One.dataIndex].framePair.First = frame1;
+            GameManager.One.datas[GameManager.One.dataIndex].framePair.First = frame2;
+            GameManager.One.datas[GameManager.One.dataIndex].interpolation = 0;
+            GameManager.One.datas[GameManager.One.dataIndex].motionPair.First = index1;
+            GameManager.One.datas[GameManager.One.dataIndex].motionPair.Second = index2;
+            GameManager.One.datas[GameManager.One.dataIndex].motionType = index1;
+        }
+    }
 }

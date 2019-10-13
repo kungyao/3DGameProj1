@@ -24,7 +24,10 @@ public class GameManager : MonoBehaviour
     public bool stop_And_Play = false;
     //是否使用內插
     public bool isInterpolation = false;
-    // Start is called before the first frame update
+    //是否使用內插
+    public bool isBlend = false;
+    //是否跟線
+    public bool isFollowLine = false;
 
     private void Awake()
     {
@@ -33,24 +36,32 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        LoadFile(Application.dataPath + "/Resources/jumpkick.bvh");
+        LoadFile(Application.dataPath + "/Resources/dance.bvh");
     }
 
     // Update is called once per frame
     void Update()
     {
-        //根據dataIndex切人物 撥放人物動畫-------------------
-        if(stop_And_Play)
+        //根據dataIndex切人物 撥放人物動畫------------------根線
+        if (stop_And_Play)
         {
-            //人物paly--------------------------------
-            if(isInterpolation)
+            if(isBlend)
             {
-                //內插---------------------
+                datas[dataIndex].TwoMotionFrame();
             }
             else
             {
-                //不要內插----------------
-                datas[dataIndex].JumpNextFrame(new Vector3(), new Vector3());
+                //人物paly
+                if (isInterpolation)
+                {
+                    datas[dataIndex].InterpolationNextFrame();
+                    //內插
+                }
+                else
+                {
+                    //不要內插
+                    datas[dataIndex].JumpNextFrame();
+                }
             }
         }
         //draw
