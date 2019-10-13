@@ -255,7 +255,6 @@ public class BvhUtility
                     roots[rTop].joint = new Joint();
                     roots[rTop].joint.name = items[1];
                     roots[rTop].joint.type = JType.ROOT;
-                    roots[rTop].fileName = Path.GetFileName(path);
                     continue;
                 }
                 else if (now == BVH.OFFSET)

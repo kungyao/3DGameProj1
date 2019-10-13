@@ -82,23 +82,26 @@ public class BvhData
 {
     public Joint joint;
     public List<Motion> motion = new List<Motion>();
-    //該動作撥到第幾貞
-    public int motionIndex = 0;
+    
     //存關節的GameObject
     public List<Transform> jointObject = new List<Transform>();
 
+    public List<Pair<Transform, Transform>> bonePair = new List<Pair<Transform, Transform>>();
+
+    //要畫出來的骨頭方塊
+    public List<Transform> boneObject = new List<Transform>();
+
     //內插進度 1~5 => 0~100
     public int interpolation = 1;
-
-    public string fileName = "";
 
     //目前是什麼動作
     public int motionType = 0;
 
     //現在的動作(楨數)
-    private int nowFrame = 0;
+    public int nowFrame = 0;
 
-   
+    //parse 到motion的地幾個
+    private int motionIndex = 0;
 
     //load 下一個動作(楨)--------------------------------------
     public void JumpNextFrame(Vector3 _position, Vector3 _rotation)
@@ -106,7 +109,7 @@ public class BvhData
         //Root關節
         assignData(jointObject[0], this.joint, 0);
         nowFrame++;
-        nowFrame %= this.motion[motionIndex].frames;
+        nowFrame %= this.motion[motionType].frames;
     }
 
     //內插至下一楨
@@ -115,10 +118,21 @@ public class BvhData
         //-----------------------------------
     }
 
-    //是否與此bvh相同------------------------------
-    public bool equal(BvhData _bvh)
+    //是否與此bvh相同 true : 相同
+    public static bool equal(Joint _bvh, Joint _bvh2)
     {
-
+        if (_bvh.jointChilds.Count != _bvh2.jointChilds.Count)
+            return false;
+        for (int i = 0; i < _bvh.jointChilds.Count; i++)
+        {
+            if (_bvh.name != _bvh2.name)
+                return false;
+            else
+            {
+                if (!equal(_bvh.jointChilds[i], _bvh2.jointChilds[i]))
+                    return false;
+            }
+        }
         return true;
     }
 
@@ -130,7 +144,17 @@ public class BvhData
     //畫骨架
     public void draw()
     {
-        //畫方塊----------------------------------------
+        int i = 0;
+        foreach (Pair<Transform, Transform> kp in bonePair)
+        {
+            Vector3 between = kp.Second.position - kp.First.position;
+            float distance = between.magnitude;
+            boneObject[i].localPosition = new Vector3(distance, boneObject[i].localPosition.y, boneObject[i].localPosition.z);
+            boneObject[i].position = kp.First.position + between / 2;
+            boneObject[i].LookAt(kp.Second.position);
+            boneObject[i].localScale = new Vector3(0.5f, 1, between.magnitude);
+            i++;
+        }
     }
 
     //根據關節recursive位移Gameobject 回傳MotionIndex
@@ -143,27 +167,27 @@ public class BvhData
         {
             if (_joint.channels[i] == "Xposition")
             {
-                tmpVec.x = this.motion[motionIndex].aniData[this.nowFrame][_motionIndex++];
+                tmpVec.x = this.motion[motionType].aniData[this.nowFrame][_motionIndex++];
             }
             else if (_joint.channels[i] == "Yposition")
             {
-                tmpVec.y = this.motion[motionIndex].aniData[this.nowFrame][_motionIndex++];
+                tmpVec.y = this.motion[motionType].aniData[this.nowFrame][_motionIndex++];
             }
             else if (_joint.channels[i] == "Zposition")
             {
-                tmpVec.z = this.motion[motionIndex].aniData[this.nowFrame][_motionIndex++];
+                tmpVec.z = this.motion[motionType].aniData[this.nowFrame][_motionIndex++];
             }
             else if (_joint.channels[i] == "Xrotation")
             {
-                tmpqua.x = this.motion[motionIndex].aniData[this.nowFrame][_motionIndex++];
+                tmpqua.x = this.motion[motionType].aniData[this.nowFrame][_motionIndex++];
             }
             else if (_joint.channels[i] == "Yrotation")
             {
-                tmpqua.y = this.motion[motionIndex].aniData[this.nowFrame][_motionIndex++];
+                tmpqua.y = this.motion[motionType].aniData[this.nowFrame][_motionIndex++];
             }
             else if (_joint.channels[i] == "Zrotation")
             {
-                tmpqua.z = this.motion[motionIndex].aniData[this.nowFrame][_motionIndex++];
+                tmpqua.z = this.motion[motionType].aniData[this.nowFrame][_motionIndex++];
             }
         }
         //調整root的pos & rot
