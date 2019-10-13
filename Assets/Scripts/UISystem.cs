@@ -138,6 +138,7 @@ public class UISystem : MonoBehaviour
             GameManager.One.datas[GameManager.One.dataIndex].framePair.First = frame1;
             GameManager.One.datas[GameManager.One.dataIndex].framePair.First = frame2;
             GameManager.One.datas[GameManager.One.dataIndex].interpolation = 0;
+            GameManager.One.datas[GameManager.One.dataIndex].nowFrame = 0;
             GameManager.One.datas[GameManager.One.dataIndex].motionPair.First = index1;
             GameManager.One.datas[GameManager.One.dataIndex].motionPair.Second = index2;
             GameManager.One.datas[GameManager.One.dataIndex].motionType = index1;

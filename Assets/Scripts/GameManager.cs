@@ -128,6 +128,9 @@ public class GameManager : MonoBehaviour
         dataIndex = datas.Count - 1;
         tmp.transform.position = Vector3.zero;
         CreateCubeObjSub(datas[datas.Count - 1].joint, tmp.transform.position, tmp);
+        if (dataIndex != 0)
+            SetObjectActive(dataIndex - 1, false);
+        SetObjectActive(dataIndex, true);
     }
 
     public void SetDis(string disStr)
